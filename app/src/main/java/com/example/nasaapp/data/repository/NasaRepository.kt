@@ -27,17 +27,23 @@ class NasaRepository(context: Context) {
         asteroideDao.observeById(id, fecha)
 
     suspend fun actualizarImagenes() {
+
         val hoy = LocalDate.now()
         val inicio = hoy.minusDays(6)
 
+        val formato = java.time.format.DateTimeFormatter
+            .ofPattern("yyMMdd")
+
         val respuesta = api.getApod(
-            inicio.toString(),
-            hoy.toString()
+            inicio.format(formato),
+            hoy.format(formato)
         )
 
-        apodDao.upsertKeepingFavorites(
-            respuesta.mapNotNull { it.toEntity() }
-        )
+        val registros = respuesta.mapNotNull {
+            it.toEntity()
+        }
+
+        apodDao.upsertKeepingFavorites(registros)
     }
 
     suspend fun actualizarAsteroides() {
