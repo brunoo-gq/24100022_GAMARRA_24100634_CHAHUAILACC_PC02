@@ -20,7 +20,7 @@ de la NASA (APOD y NeoWs) y los guarda localmente con Room (SQLite).
 3. Agregar en el archivo `local.properties` (en la raíz, no se sube a Git):
 
    ```
-   NASA_API_KEY=tu_clave_aqui
+   API_KEY=tu_clave_aqui
    ```
 
 4. Sincronizar Gradle y ejecutar en un emulador o dispositivo.
