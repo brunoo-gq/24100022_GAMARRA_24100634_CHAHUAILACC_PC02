@@ -1,29 +1,30 @@
+
 package com.example.nasaapp.navigation
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.*
+import com.example.nasaapp.presentation.nasa.*
 
 @Composable
 fun AppNavGraph() {
 
     val navController = rememberNavController()
-    val backStack by navController.currentBackStackEntryAsState()
-    val rutaActual = backStack?.destination?.route
+    val vm: NasaViewModel = viewModel()
+
+    val entrada by navController.currentBackStackEntryAsState()
+    val ruta = entrada?.destination?.route
 
     Scaffold(
         bottomBar = {
-            if (rutaActual == "imagenes" ||
-                rutaActual == "asteroides") {
-
+            if (ruta == "imagenes" || ruta == "asteroides") {
                 NavigationBar {
-
                     NavigationBarItem(
-                        selected = rutaActual == "imagenes",
+                        selected = ruta == "imagenes",
                         onClick = {
                             navController.navigate("imagenes") {
                                 popUpTo(navController.graph.findStartDestination().id) {
@@ -38,7 +39,7 @@ fun AppNavGraph() {
                     )
 
                     NavigationBarItem(
-                        selected = rutaActual == "asteroides",
+                        selected = ruta == "asteroides",
                         onClick = {
                             navController.navigate("asteroides") {
                                 popUpTo(navController.graph.findStartDestination().id) {
@@ -61,81 +62,74 @@ fun AppNavGraph() {
             startDestination = "imagenes",
             modifier = Modifier.padding(padding)
         ) {
-
             composable("imagenes") {
-                PantallaInicial(
-                    titulo = "Imágenes NASA",
+                ApodScreen(
+                    vm = vm,
+                    favoritos = false,
+                    onVolver = {},
                     onFavoritos = {
                         navController.navigate("imagenes/favoritos")
                     },
-                    onDetalle = {
-                        navController.navigate("imagenes/detalle")
-                    }
-                )
-            }
-
-            composable("asteroides") {
-                PantallaInicial(
-                    titulo = "Asteroides NASA",
-                    onFavoritos = {
-                        navController.navigate("asteroides/favoritos")
-                    },
-                    onDetalle = {
-                        navController.navigate("asteroides/detalle")
+                    onDetalle = { fecha ->
+                        navController.navigate("imagenes/detalle/$fecha")
                     }
                 )
             }
 
             composable("imagenes/favoritos") {
-                PantallaSecundaria("Mis imágenes favoritas")
+                ApodScreen(
+                    vm = vm,
+                    favoritos = true,
+                    onVolver = { navController.popBackStack() },
+                    onFavoritos = {},
+                    onDetalle = { fecha ->
+                        navController.navigate("imagenes/detalle/$fecha")
+                    }
+                )
             }
 
-            composable("imagenes/detalle") {
-                PantallaSecundaria("Detalle de imagen")
+            composable("imagenes/detalle/{fecha}") { entry ->
+                ApodDetailScreen(
+                    vm = vm,
+                    fecha = entry.arguments?.getString("fecha").orEmpty(),
+                    onVolver = { navController.popBackStack() }
+                )
+            }
+
+            composable("asteroides") {
+                AsteroideScreen(
+                    vm = vm,
+                    favoritos = false,
+                    onVolver = {},
+                    onFavoritos = {
+                        navController.navigate("asteroides/favoritos")
+                    },
+                    onDetalle = { id, fecha ->
+                        navController.navigate("asteroides/detalle/$id/$fecha")
+                    }
+                )
             }
 
             composable("asteroides/favoritos") {
-                PantallaSecundaria("Mis asteroides")
+                AsteroideScreen(
+                    vm = vm,
+                    favoritos = true,
+                    onVolver = { navController.popBackStack() },
+                    onFavoritos = {},
+                    onDetalle = { id, fecha ->
+                        navController.navigate("asteroides/detalle/$id/$fecha")
+                    }
+                )
             }
 
-            composable("asteroides/detalle") {
-                PantallaSecundaria("Detalle de asteroide")
+            composable("asteroides/detalle/{id}/{fecha}") { entry ->
+                AsteroideDetailScreen(
+                    vm = vm,
+                    id = entry.arguments?.getString("id").orEmpty(),
+                    fecha = entry.arguments?.getString("fecha").orEmpty(),
+                    onVolver = { navController.popBackStack() }
+                )
             }
         }
-    }
-}
-
-@Composable
-fun PantallaInicial(
-    titulo: String,
-    onFavoritos: () -> Unit,
-    onDetalle: () -> Unit
-) {
-    Column(modifier = Modifier.padding(16.dp)) {
-
-        Text(
-            text = titulo,
-            style = MaterialTheme.typography.headlineMedium
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Button(onClick = onFavoritos) {
-            Text("Mis favoritos")
-        }
-
-        Button(onClick = onDetalle) {
-            Text("Ver detalle")
-        }
-    }
-}
-
-@Composable
-fun PantallaSecundaria(titulo: String) {
-    Column(modifier = Modifier.padding(16.dp)) {
-        Text(
-            text = titulo,
-            style = MaterialTheme.typography.headlineMedium
-        )
     }
 }
