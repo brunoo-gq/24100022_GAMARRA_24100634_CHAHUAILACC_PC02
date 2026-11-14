@@ -27,9 +27,6 @@ private fun numero(valor: Double): String {
     return String.format(Locale.US, "%.2f", valor)
 }
 
-// ============================================
-// MOSTRAR FOTOGRAFIAS NASA
-// ============================================
 
 @Composable
 fun FotoNasa(
@@ -60,14 +57,23 @@ fun FotoNasa(
         return
     }
 
-    val urlNormal = imagen.url?.takeIf { it.isNotBlank() }
-    val urlHd = imagen.hdUrl?.takeIf { it.isNotBlank() }
 
-    val urlImagen = if (usarHd) {
-        urlHd ?: urlNormal
-    } else {
-        urlNormal ?: urlHd
+    val urlHd = imagen.hdUrl?.takeIf {
+        it.startsWith("https://")
     }
+
+    val urlNormal = imagen.url?.takeIf { enlace ->
+        val ruta = enlace.substringBefore("?").lowercase()
+
+        ruta.endsWith(".jpg") ||
+                ruta.endsWith(".jpeg") ||
+                ruta.endsWith(".png") ||
+                ruta.endsWith(".webp") ||
+                ruta.endsWith(".gif")
+    }
+
+
+    val urlImagen = urlHd ?: urlNormal
 
     if (urlImagen == null) {
         Text("La NASA no proporcionó una imagen")
@@ -129,9 +135,6 @@ fun FotoNasa(
     }
 }
 
-// ============================================
-// LISTA DE IMAGENES APOD
-// ============================================
 
 @Composable
 fun ApodScreen(
@@ -260,9 +263,6 @@ fun ApodScreen(
     }
 }
 
-// ============================================
-// TARJETA DE IMAGEN
-// ============================================
 
 @Composable
 fun ApodTarjeta(
@@ -324,9 +324,6 @@ fun ApodTarjeta(
     }
 }
 
-// ============================================
-// DETALLE DE IMAGEN
-// ============================================
 
 @Composable
 fun ApodDetailScreen(
@@ -406,9 +403,6 @@ fun ApodDetailScreen(
     }
 }
 
-// ============================================
-// LISTA DE ASTEROIDES
-// ============================================
 
 @Composable
 fun AsteroideScreen(
@@ -525,10 +519,6 @@ fun AsteroideScreen(
     }
 }
 
-// ============================================
-// TARJETA DE ASTEROIDE
-// ============================================
-
 @Composable
 fun AsteroideTarjeta(
     asteroide: AsteroideEntity,
@@ -600,10 +590,6 @@ fun AsteroideTarjeta(
         }
     }
 }
-
-// ============================================
-// DETALLE DE ASTEROIDE
-// ============================================
 
 @Composable
 fun AsteroideDetailScreen(
